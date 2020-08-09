@@ -41,14 +41,14 @@ jobs:
         run: ./gradlew test
 
       # Restore release key
-      - name: restoreReleaseKeystore
-          run:|
+      - name: RestoreReleaseKeystore
+        run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" >release.keystore.asc
           gpg -d --passphrase "${{ secrets.RELEASE_KEYSTORE_PASSPHRASE }}" --batch release.keystore.asc > key/open_source_key.jks
 
       # Restore release config
-      - name: restoreReleaseConfig
-          run:|
+      - name: RestoreReleaseConfig
+        run: |
           echo "${{ secrets.RELEASE_CONFIG }}" >releaseConfig.asc
           gpg -d --passphrase "${{ secrets.RELEASE_CONFIG_PASSPHRASE }}" --batch releaseConfig.asc > app/releaseConfig.properties
 
