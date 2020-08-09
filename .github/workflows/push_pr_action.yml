@@ -33,18 +33,22 @@ jobs:
         with:
           java-version: 1.8
 
+      - name: CreateReleaseKeyStore
+        run:  touch key/open_source_key.jks
+
+      - name: CreateReleaseConfig
+        run: touch app/releaseConfig.properties
+
   # Restore release key
       - name: RestoreReleaseKeystore
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" >release.keystore.asc
-          touch key/open_source_key.jks
           gpg -d --passphrase "${{ secrets.RELEASE_KEYSTORE_PASSPHRASE }}" --batch release.keystore.asc > key/open_source_key.jks
 
       # Restore release config
       - name: RestoreReleaseConfig
         run: |
           echo "${{ secrets.RELEASE_CONFIG }}" >releaseConfig.asc
-          touch app/releaseConfig.properties
           gpg -d --passphrase "${{ secrets.RELEASE_CONFIG_PASSPHRASE }}" --batch releaseConfig.asc > app/releaseConfig.properties
 
 
@@ -65,3 +69,9 @@ jobs:
         with:
           name: release-app
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: RemoveReleaseKeyStore
+        run:  rm key/open_source_key.jks    
+        
+      - name: RemoveReleaseConfig
+        run: rm app/releaseConfig.properties
