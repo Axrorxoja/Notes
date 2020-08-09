@@ -34,7 +34,7 @@ jobs:
           java-version: 1.8
 
       - name: CreateReleaseKeyStore
-        run:  touch key/open_source_key.jks
+        run:  mkdir key; touch key/open_source_key.jks
 
       - name: CreateReleaseConfig
         run: touch app/releaseConfig.properties
