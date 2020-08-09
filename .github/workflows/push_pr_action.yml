@@ -33,14 +33,7 @@ jobs:
         with:
           java-version: 1.8
 
-      # Install NDK
-      #     - name: Install NDK
-      #       run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
-      # Runs test
-      - name: Run tests
-        run: ./gradlew test
-
-      # Restore release key
+  # Restore release key
       - name: RestoreReleaseKeystore
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" >release.keystore.asc
@@ -51,6 +44,14 @@ jobs:
         run: |
           echo "${{ secrets.RELEASE_CONFIG }}" >releaseConfig.asc
           gpg -d --passphrase "${{ secrets.RELEASE_CONFIG_PASSPHRASE }}" --batch releaseConfig.asc > app/releaseConfig.properties
+
+
+      # Install NDK
+      #     - name: Install NDK
+      #       run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
+      # Runs test
+      - name: Run tests
+        run: ./gradlew test
 
       # Create Build
       - name: Build Project
