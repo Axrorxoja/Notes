@@ -1,7 +1,5 @@
 name: Pull Request,Push Action
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches:
@@ -10,7 +8,6 @@ on:
     branches:
       - master
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -35,24 +32,31 @@ jobs:
         with:
           java-version: 1.8
 
+      - name: CreateReleaseKeyStore
+        run:  mkdir key; touch key/open_source_key.jks
+
+      - name: CreateReleaseConfig
+        run: touch app/releaseConfig.properties
+
+  # Restore release key
+      - name: RestoreReleaseKeystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE }}" >release.keystore.asc
+          gpg -d --passphrase "${{ secrets.RELEASE_KEYSTORE_PASSPHRASE }}" --batch release.keystore.asc > key/open_source_key.jks
+
+      # Restore release config
+      - name: RestoreReleaseConfig
+        run: |
+          echo "${{ secrets.RELEASE_CONFIG }}" >releaseConfig.asc
+          gpg -d --passphrase "${{ secrets.RELEASE_CONFIG_PASSPHRASE }}" --batch releaseConfig.asc > app/releaseConfig.properties
+
+
       # Install NDK
       #     - name: Install NDK
       #       run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
       # Runs test
       - name: Run tests
         run: ./gradlew test
-
-      # Restore release key
-      - name: restoreReleaseKeystore
-          run:|
-          echo "${{ secrets.RELEASE_KEYSTORE }}" >release.keystore.asc
-          gpg -d --passphrase "${{ secrets.RELEASE_KEYSTORE_PASSPHRASE }}" --batch release.keystore.asc > key/release.keystore
-
-      # Restore release config
-      - name: restoreReleaseConfig
-          run:|
-          echo "${{ secrets.RELEASE_CONFIG }}" >releaseConfig.asc
-          gpg -d --passphrase "${{ secrets.RELEASE_CONFIG_PASSPHRASE }}" --batch releaseConfig.asc > app/releaseConfig.properties
 
       # Create Build
       - name: Build Project
@@ -64,3 +68,9 @@ jobs:
         with:
           name: release-app
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: RemoveReleaseKeyStore
+        run:  rm key/open_source_key.jks    
+        
+      - name: RemoveReleaseConfig
+        run: rm app/releaseConfig.properties
